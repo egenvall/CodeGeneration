@@ -1,0 +1,106 @@
+«IMPORT configurator»
+«DEFINE main FOR Configuration»
+«EXPAND  typo FOR rootTopic»
+«ENDDEFINE»
+«DEFINE typo FOR TopicType»
+
+	«FILE "test.html"»
+		<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+		<html xmlns="http://www.w3.org/1999/xhtml">
+		<head>
+		  <title>Text</title>
+		  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		  <link rel="stylesheet" type="text/css" href="../static/style.css" />
+		</head>
+		 
+		<body>
+		  <div id="page-wrap">
+		  
+		  <h1>Root: «this.name»</h1> <!-- Order-->
+		   <ul>
+		   <li data-jstree='{ "opened" : true }'>«this.name»
+		   «EXPAND type FOR this»
+		   </li>
+		   	</ul>
+		  </div>
+		</body>
+		</html>
+	«ENDFILE»
+
+ «ENDDEFINE»
+ «DEFINE type FOR TopicType»
+	<!-- FOR A TOPICTYPE -->
+	
+		  <!--IF NOT ABSTRACT, ADD NODE <LI> -->
+		«IF !this.isAbstract»
+			<li>«this.name» 
+			
+		«ENDIF»
+		
+		<!--IF THIS TOPICTYPE HAS ALTERNATIVES, ADD THEM AS CHILDREN -->
+		«IF !this.alternatives.isEmpty»
+			<ul>
+			«EXPAND alternative FOREACH this.alternatives»
+			</ul>
+		«ENDIF»
+		
+		<!-- IS IT EXTENDED? CALL TO TOPICTYPE, ADD FINDINGS THERE AS CHILDREN --> 
+		«IF !this.extendedBy.isEmpty»
+			<ul>
+			«EXPAND type FOREACH this.extendedBy»
+			</ul>
+		«ENDIF»
+		  </li>
+		  
+		  <!-- DOES IT VALIDATE SOMETHING? TODO EXPRESSION-->
+	
+«ENDDEFINE»
+ 
+«DEFINE alternative FOR Alternative»
+	<!-- Add to subnode -->
+	<li
+	«IF this.lowerBound == 1»
+	 class="mandatory
+	 «IF this.upperBound == 1»
+	 xor"
+	 «ELSE»
+	 "
+	 «ENDIF»
+	 >«this.name»+M
+	«ELSE»
+	 class="optional or">«this.name»+O
+	«ENDIF»
+	
+	
+	<!-- Call for the Alternatives Type -->
+	«EXPAND type FOR this.type»
+	</li>
+«ENDDEFINE»
+
+«DEFINE type FOR Type»
+«IF this.name == "YesNo"»
+	<ul>  
+	<li>Yes</li>
+	</ul>
+	«ENDIF»
+«ENDDEFINE»
+
+«DEFINE type FOR EnumType»
+	<ul>
+		«FOREACH this.literals AS e»
+			<li>«e.name»</li>
+		«ENDFOREACH»
+	</ul>
+«ENDDEFINE»
+
+«DEFINE type FOR UnitType»
+    <!-- Fix using step -->
+	    <ul>
+	    «FOREACH this.lowerLimit.upTo(this.upperLimit) AS i»
+    		<li>«i»</li>
+		«ENDFOREACH»
+		</ul>
+«ENDDEFINE»
+
+
+
