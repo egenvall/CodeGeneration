@@ -50,15 +50,46 @@
 			«EXPAND type FOREACH this.extendedBy»
 			</ul>
 		«ENDIF»
+		
+		«IF !this.validates.isEmpty»
+			<ul>
+			«EXPAND expr FOREACH this.validates»
+			</ul>
+		«ENDIF»
+		
 		  </li>
 		  
-		  <!-- DOES IT VALIDATE SOMETHING? TODO EXPRESSION-->
+		  
 	
 «ENDDEFINE»
+ «DEFINE expr FOR Expr»
+<!-- Shouldnt happen -->
+ «ENDDEFINE»
+ 
+  «DEFINE expr FOR OperatorExpr»
+  <!-- > -->
+ <li>«this.type»
+ «EXPAND expr FOREACH this.subExprs»
+ </li>
+ 
+ 
+ 
+ «ENDDEFINE»
+  «DEFINE expr FOR SymbolExpr»
+  <!-- Alternative -->
+  
+ <li>«this.refersTo.name»</li>
+ «ENDDEFINE»
+ 
+  «DEFINE expr FOR LiteralExpr»
+  <!-- 4 -->
+ <li>«this.value»</li>
+ «ENDDEFINE»
+ 
  
 «DEFINE alternative FOR Alternative»
 	<!-- Add to subnode -->
-	<li
+	<li 
 	«IF this.lowerBound == 1»
 	 class="mandatory
 	 «IF this.upperBound == 1»
@@ -77,7 +108,9 @@
 	</li>
 «ENDDEFINE»
 
+
 «DEFINE type FOR Type»
+
 «IF this.name == "YesNo"»
 	<ul>  
 	<li>Yes</li>
