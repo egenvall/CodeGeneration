@@ -1,139 +1,263 @@
-«IMPORT configurator»
-«DEFINE main FOR Configuration»
-«EXPAND  typo FOR rootTopic»
-«ENDDEFINE»
-«DEFINE typo FOR TopicType»
+Â«IMPORT configuratorÂ»
+Â«DEFINE main FOR ConfigurationÂ»
+Â«EXPAND  typo FOR rootTopicÂ»
+Â«ENDDEFINEÂ»
+Â«DEFINE typo FOR TopicTypeÂ»
 
-	«FILE "test.html"»
-		<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-		<html xmlns="http://www.w3.org/1999/xhtml">
+	Â«FILE "test.html"Â»
+		<!DOCTYPE html>
+		<html lang="en">
 		<head>
-		  <title>Text</title>
-		  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		  <link rel="stylesheet" type="text/css" href="../static/style.css" />
+		<meta charset="UTF-8">
+		<title>jÂ«this.nameÂ» Configuration</title>
+		<style>
+		html { margin:0; padding:0; font-size:62.5%; }
+		body { max-width:800px; min-width:300px; margin:0 auto; padding:20px 10px; font-size:14px; font-size:1.4em; }
+		h1 { font-size:1.8em; }
+		.demo { overflow:auto; border:1px solid silver; min-height:100px; }
+		</style>
+		<link rel="stylesheet" href="../../WebsiteFiles/dist/themes/default/style.min.css" />
+    	<link rel="stylesheet" href="../../WebsiteFiles/style.css"/>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+		<script src="../../WebsiteFiles/jstree.min.js"></script>
 		</head>
 		 
 		<body>
-		  <div id="page-wrap">
-		  
-		  <h1>Root: «this.name»</h1> <!-- Order-->
-		   <ul>
-		   <li data-jstree='{ "opened" : true }'>«this.name»
-		   «EXPAND type FOR this»
-		   </li>
-		   	</ul>
-		  </div>
-		</body>
-		</html>
-	«ENDFILE»
+		<div id="html" class="demo">
 
- «ENDDEFINE»
- «DEFINE type FOR TopicType»
+		   
+		   Â«EXPAND type FOR thisÂ»
+		
+		   </div>
+		   <button id="button">Summary</button>
+
+
+
+
+	<script>
+  $(document).ready(function () {
+ $("#html li").data('jstree', {opened: true});
+$("#html").jstree({
+    "checkbox": {
+        "keep_selected_style": false,
+        "visible" : true,
+        "three_state": true,
+        "whole_node" : true,
+                },
+   "core": {
+        "themes":{
+            "icons":false
+        }
+    },
+    "plugins": ["checkbox","ui","themes"],
+          });
+
+
+      function pluckByName(inArr, id){
+
+            for (i = 0; i < inArr.length; i++ ){
+
+                if (inArr[i] == id)
+                {
+                    console.log(inArr[i] + "==" + id);
+                    return true;
+                }
+            }
+          return false;
+
+    }
+
+
+
+$("#button").click(function () {
+
+     function iterateTree(li){
+         var success = true;
+
+          //elem.each(function(index,li){
+                li = $(li);
+              /*Check madatory*/
+              if(li.is(".hasBounds") && li.find('.yesno, input').length == 0){
+                  var lower= li.data("low");
+                  var upper = li.data("high");
+
+                 var counter = 0;
+                  li.find("> ul > li").each(function(index, elem){
+
+                    if($("#html").jstree(true).is_selected(elem) || $("#html").jstree(true).is_undetermined(elem)){
+
+                        counter++;
+                        if(!iterateTree(elem)){
+                            success = false;
+                          }
+                  }
+
+                  });
+
+                  if(counter >= lower && counter <= upper){
+                      /*ok*/
+
+
+                  }
+                  else{
+                      success = false;
+                      li.addClass('error');
+                      console.log("Violation");
+                  }
+                }
+
+ 
+          //});
+
+        return success;
+      }
+
+
+        var result = "";
+    $("#html li").removeClass('error');
+    $("#html > ul > li").each(function(idx,el){result += iterateTree(el);});
+
+		var checkFoFalse = (result.indexOf("false") > -1);
+		if(!checkFoFalse){
+			var listChecked = ($('#html').jstree(true).get_checked(true));
+			document.write('&lt;?xml version="1.0" encoding="UTF-8"?><br>');
+			document.write('&lt;Feature:Â«this.nameÂ»><br>');
+				$.each(listChecked,function(i,node){
+
+					if(node.children.length > 0){
+					 /*TODO CHECK IF MANDATORY-*/
+					}
+					else{
+							//Leaf
+						if(node.text.indexOf("input")> -1){
+							var cutPlaceStart = node.text.indexOf(">")
+							var cutPlaceEnd = node.text.indexOf("</span>")
+							document.write('&lt;enabledfeature name='+ node.parents.slice(0,node.parents.length-1)+ ' '+ node.text.slice(cutPlaceStart+1,cutPlaceEnd) +' /><br>');
+						}
+						else{
+							document.write('&lt;enabledfeature name='+ node.parents.slice(0,node.parents.length-1)+ ' '+ node.text +' /><br>');
+						}
+					}
+			});
+			document.write('&lt;/Feature:Â«this.nameÂ»>');
+		}
+
+
+});
+
+
+
+
+
+});
+
+
+
+
+  </script>
+</body>
+</html>
+
+	Â«ENDFILEÂ»
+
+ Â«ENDDEFINEÂ»
+ Â«DEFINE type FOR TopicTypeÂ»
 	<!-- FOR A TOPICTYPE -->
 	
 		  <!--IF NOT ABSTRACT, ADD NODE <LI> -->
-		«IF !this.isAbstract»
-			<li>«this.name» 
-			
-		«ENDIF»
 		
 		<!--IF THIS TOPICTYPE HAS ALTERNATIVES, ADD THEM AS CHILDREN -->
-		«IF !this.alternatives.isEmpty»
-			<ul>
-			«EXPAND alternative FOREACH this.alternatives»
-			</ul>
-		«ENDIF»
+		Â«IF !this.isAbstract || !this.alternatives.isEmpty || !this.extendedBy.isEmpty || !this.validates.isEmptyÂ»<ul>Â«ENDIFÂ»
+		
+		
+		Â«IF !this.isAbstractÂ»<li><span class="label">Â«this.nameÂ»</span></li>Â«ENDIFÂ»
+			
+			Â«EXPAND alternative FOREACH this.alternativesÂ»
+			
 		
 		<!-- IS IT EXTENDED? CALL TO TOPICTYPE, ADD FINDINGS THERE AS CHILDREN --> 
-		«IF !this.extendedBy.isEmpty»
-			<ul>
-			«EXPAND type FOREACH this.extendedBy»
-			</ul>
-		«ENDIF»
+		Â«IF !this.extendedBy.isEmptyÂ»
+			
+			Â«EXPAND type FOREACH this.extendedByÂ»
+			
+		Â«ENDIFÂ»
 		
-		«IF !this.validates.isEmpty»
-			<ul>
-			«EXPAND expr FOREACH this.validates»
-			</ul>
-		«ENDIF»
-		
-		  </li>
+		Â«IF !this.validates.isEmptyÂ»
+			
+			Â«EXPAND expr FOREACH this.validatesÂ»
+			
+		Â«ENDIFÂ»
+		Â«IF !this.alternatives.isEmpty || !this.extendedBy.isEmpty || !this.validates.isEmptyÂ»</ul>Â«ENDIFÂ»
+		  
 		  
 		  
 	
-«ENDDEFINE»
- «DEFINE expr FOR Expr»
+Â«ENDDEFINEÂ»
+ Â«DEFINE expr FOR ExprÂ»
 <!-- Shouldnt happen -->
- «ENDDEFINE»
+ Â«ENDDEFINEÂ»
  
-  «DEFINE expr FOR OperatorExpr»
+  Â«DEFINE expr FOR OperatorExprÂ»
   <!-- > -->
- <li>«this.type»
- «EXPAND expr FOREACH this.subExprs»
+ <li>Â«this.typeÂ»
+ Â«EXPAND expr FOREACH this.subExprsÂ»
  </li>
  
  
  
- «ENDDEFINE»
-  «DEFINE expr FOR SymbolExpr»
+ Â«ENDDEFINEÂ»
+  Â«DEFINE expr FOR SymbolExprÂ»
   <!-- Alternative -->
   
- <li>«this.refersTo.name»</li>
- «ENDDEFINE»
+ <li>Â«this.refersToÂ»</li>
+ Â«ENDDEFINEÂ»
  
-  «DEFINE expr FOR LiteralExpr»
+  Â«DEFINE expr FOR LiteralExprÂ»
   <!-- 4 -->
- <li>«this.value»</li>
- «ENDDEFINE»
+ <li>Â«this.valueÂ»</li>
+ Â«ENDDEFINEÂ»
  
  
-«DEFINE alternative FOR Alternative»
+Â«DEFINE alternative FOR AlternativeÂ»
 	<!-- Add to subnode -->
-	<li 
-	«IF this.lowerBound == 1»
-	 class="mandatory
-	 «IF this.upperBound == 1»
-	 xor"
-	 «ELSE»
-	 "
-	 «ENDIF»
-	 >«this.name»+M
-	«ELSE»
-	 class="optional or">«this.name»+O
-	«ENDIF»
-	
-	
+	<li id="Â«this.nameÂ»"
+	 data-low="Â«this.lowerBoundÂ»"
+	 data-high="Â«this.upperBoundÂ»"
+	 class = "hasBounds"
+	 ><span class="label">Â«this.nameÂ»</span> 
 	<!-- Call for the Alternatives Type -->
-	«EXPAND type FOR this.type»
+	Â«EXPAND type FOR this.typeÂ»
 	</li>
-«ENDDEFINE»
+Â«ENDDEFINEÂ»
 
 
-«DEFINE type FOR Type»
+Â«DEFINE type FOR TypeÂ»
 
-«IF this.name == "YesNo"»
+Â«IF this.name == "YesNo"Â»
 	<ul>  
-	<li>Yes</li>
+	<li class="yesno" >Yes</li>
+	
 	</ul>
-	«ENDIF»
-«ENDDEFINE»
+	Â«ENDIFÂ»
+Â«ENDDEFINEÂ»
 
-«DEFINE type FOR EnumType»
+Â«DEFINE type FOR EnumTypeÂ»
 	<ul>
-		«FOREACH this.literals AS e»
-			<li>«e.name»</li>
-		«ENDFOREACH»
+		Â«FOREACH this.literals AS eÂ»
+			<li>Â«e.nameÂ»</li>
+		Â«ENDFOREACHÂ»
 	</ul>
-«ENDDEFINE»
+Â«ENDDEFINEÂ»
 
-«DEFINE type FOR UnitType»
-    <!-- Fix using step -->
-	    <ul>
-	    «FOREACH this.lowerLimit.upTo(this.upperLimit) AS i»
-    		<li>«i»</li>
-		«ENDFOREACH»
-		</ul>
-«ENDDEFINE»
-
-
-
+Â«DEFINE type FOR UnitTypeÂ»
+ 
+	    
+	    <input type="number" min="Â«this.lowerLimitÂ»" max="Â«this.upperLimitÂ»" step="Â«this.stepÂ»" />Â«this.unitNameÂ»
+	    
+Â«ENDDEFINEÂ»
+Â«DEFINE type FOR NumberTypeÂ»
+    
+	    
+	    <input type="number" min="Â«this.lowerLimitÂ»" max="Â«this.upperLimitÂ»" step="Â«this.stepÂ»" />
+	    
+Â«ENDDEFINEÂ»
